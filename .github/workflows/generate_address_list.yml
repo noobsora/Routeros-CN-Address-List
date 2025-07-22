@@ -1,0 +1,51 @@
+name: Generate CN Address List
+
+on:
+  schedule:
+    - cron: '0 0 * * *'   # Runs daily at 00:00 UTC
+  workflow_dispatch:       # Allow manual trigger
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Create output folder if not exists
+        run: mkdir -p output
+
+      - name: Generate CN.rsc using Python
+        run: |
+          python <<EOF
+          import requests
+          from datetime import datetime
+          from pathlib import Path
+
+          ipv4_url = "http://www.iwik.org/ipcountry/mikrotik/CN"
+          ipv6_url = "http://www.iwik.org/ipcountry/mikrotik_ipv6/CN"
+
+          def download(url):
+              res = requests.get(url, timeout=30)
+              res.raise_for_status()
+              return res.text.strip()
+
+          ipv4 = download(ipv4_url)
+          ipv6 = download(ipv6_url)
+          now = datetime.utcnow().strftime("%Y-%m-%d %H:%M UTC")
+
+          header = f"/// Generated on {now} from iwik.org CN sources (IPv4 & IPv6)\\n"
+          combined = "\\n".join([header, ipv4, "", ipv6])
+
+          Path("output/CN.rsc").write_text(combined, encoding="utf-8")
+          print("✅ CN.rsc generated.")
+          EOF
+
+      - name: Commit and push changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add output/CN.rsc
+          git commit -m "Auto-update CN.rsc on $(date -u +'%Y-%m-%d %H:%M UTC')" || echo "No changes to commit"
+          git push
