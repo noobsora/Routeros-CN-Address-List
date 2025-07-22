@@ -1,0 +1,59 @@
+name: Generate CN_v2 Address List
+
+on:
+  schedule:
+    - cron: '0 0 * * *'  # 每天0点 UTC时间运行
+  workflow_dispatch:      # 允许手动触发
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Setup Python 3.11
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.11"
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install requests
+
+    - name: Run IP merge script and output info
+      id: gen_list
+      run: |
+        set -o pipefail
+        start_time=$(date +%s)
+
+        python your_script.py | tee output.log
+
+        filesize=$(stat -c%s output/CN_v2.rsc)
+
+        ipv4_before=$(grep "Total IPv4 ranges before merge" output.log | tail -1 | awk '{print $NF}')
+        ipv6_before=$(grep "Total IPv6 ranges before merge" output.log | tail -1 | awk '{print $NF}')
+        ipv4_after=$(grep "Total IPv4 ranges after merge" output.log | tail -1 | awk '{print $NF}')
+        ipv6_after=$(grep "Total IPv6 ranges after merge" output.log | tail -1 | awk '{print $NF}')
+
+        end_time=$(date +%s)
+        duration=$((end_time - start_time))
+
+        echo "::set-output name=filesize::$filesize"
+        echo "::set-output name=ipv4_before::$ipv4_before"
+        echo "::set-output name=ipv6_before::$ipv6_before"
+        echo "::set-output name=ipv4_after::$ipv4_after"
+        echo "::set-output name=ipv6_after::$ipv6_after"
+        echo "::set-output name=duration::$duration"
+
+    - name: Summary
+      run: |
+        echo "### CN_v2 Generation Summary ###"
+        echo "IPv4 ranges before merge: ${{ steps.gen_list.outputs.ipv4_before }}"
+        echo "IPv6 ranges before merge: ${{ steps.gen_list.outputs.ipv6_before }}"
+        echo "IPv4 ranges after merge: ${{ steps.gen_list.outputs.ipv4_after }}"
+        echo "IPv6 ranges after merge: ${{ steps.gen_list.outputs.ipv6_after }}"
+        echo "Output file size: ${{ steps.gen_list.outputs.filesize }} bytes"
+        echo "Script execution time: ${{ steps.gen_list.outputs.duration }} seconds"
