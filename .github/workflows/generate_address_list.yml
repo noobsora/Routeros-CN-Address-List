@@ -3,7 +3,7 @@ name: Generate CN Address List
 on:
   schedule:
     - cron: '0 0 * * *'   # 每天 00:00 UTC 自动运行
-  workflow_dispatch:       # 支持手动运行
+  workflow_dispatch:
 
 jobs:
   build:
@@ -16,36 +16,14 @@ jobs:
       - name: Create output folder if not exists
         run: mkdir -p output
 
-      - name: Generate CN.rsc and CN files using Python
+      - name: Run generate_address_list.py
         run: |
-          python <<EOF
-          import requests
-          from pathlib import Path
+          python3 generate_address_list.py
 
-          ipv4_url = "http://www.iwik.org/ipcountry/mikrotik/CN"
-          ipv6_url = "http://www.iwik.org/ipcountry/mikrotik_ipv6/CN"
-
-          def download(url):
-              res = requests.get(url, timeout=30)
-              res.raise_for_status()
-              return res.text.strip()
-
-          ipv4 = download(ipv4_url)
-          ipv6 = download(ipv6_url)
-
-          combined = "\\n".join([ipv4, "", ipv6])
-
-          output_dir = Path("output")
-          output_dir.mkdir(exist_ok=True)
-
-          file_rsc = output_dir / "CN.rsc"
-          file_noext = output_dir / "CN"
-
-          file_rsc.write_text(combined, encoding="utf-8")
-          file_noext.write_text(combined, encoding="utf-8")
-
-          print("✅ CN.rsc and CN files generated.")
-          EOF
+      - name: Show output file info
+        run: |
+          ls -lh output/CN*
+          wc -l output/CN*
 
       - name: Commit and push changes
         env:
@@ -54,5 +32,5 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add output/CN.rsc output/CN
-          git commit -m "Auto-update CN files on $(date -u +'%Y-%m-%d %H:%M UTC')" || exit 0
+          git commit -m "📦 Auto-update CN files on $(date -u +'%Y-%m-%d %H:%M UTC')" || echo "No changes to commit"
           git push https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git HEAD:main
