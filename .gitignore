@@ -1,0 +1,23 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*.so
+
+# Caches
+.cache/
+*.log
+
+# Python virtual environments
+.venv/
+env/
+venv/
+
+# Output except CN.rsc
+/output/*
+!/output/CN.rsc
+
+# macOS files
+.DS_Store
+
+# GitHub Actions temp
+*.bak
