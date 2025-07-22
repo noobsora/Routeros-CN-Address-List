@@ -3,6 +3,7 @@ import ipaddress
 from pathlib import Path
 import re
 
+# 数据来源 URL
 ipv4_script_url_1 = "http://www.iwik.org/ipcountry/mikrotik/CN"
 ipv6_script_url_1 = "http://www.iwik.org/ipcountry/mikrotik_ipv6/CN"
 ipv4_plain_url_2 = "https://raw.githubusercontent.com/gaoyifan/china-operator-ip/refs/heads/ip-lists/china.txt"
@@ -67,9 +68,10 @@ def main():
 
     output_dir = Path("output")
     output_dir.mkdir(exist_ok=True)
-    # 生成.rsc文件及无后缀文件
-    Path(output_dir / "CN_v2.rsc").write_text(final_output, encoding="utf-8")
-    Path(output_dir / "CN_v2").write_text(final_output, encoding="utf-8")
+
+    # 输出两个文件：CN_v2（无扩展名）和 CN_v2.rsc
+    (output_dir / "CN_v2").write_text(final_output, encoding="utf-8")
+    (output_dir / "CN_v2.rsc").write_text(final_output, encoding="utf-8")
 
 if __name__ == "__main__":
     main()
