@@ -10,33 +10,54 @@ ipv4_plain_url_2 = "https://raw.githubusercontent.com/gaoyifan/china-operator-ip
 ipv6_plain_url_2 = "https://raw.githubusercontent.com/gaoyifan/china-operator-ip/refs/heads/ip-lists/china6.txt"
 
 def fetch_text(url):
+    """
+    请求URL，返回文本内容，失败返回None
+    """
     try:
         resp = requests.get(url, timeout=30)
         resp.raise_for_status()
         return resp.text.strip()
     except Exception as e:
         print(f"⚠️ Warning: Failed to fetch {url} due to {e}", file=sys.stderr)
-        return ""
+        return None
 
 def parse_script_style_ips(text):
+    """
+    从RouterOS脚本格式文本提取IP段，示例：address=1.2.3.0/24
+    """
+    if not text:
+        return set()
     pattern = re.compile(r'address=([\da-fA-F:\./]+)')
     return {m.group(1) for m in map(pattern.search, text.splitlines()) if m}
 
 def parse_plain_ips(text):
+    """
+    解析纯IP段列表，忽略注释和空行
+    """
+    if not text:
+        return set()
     return {line.strip() for line in text.splitlines() if line.strip() and not line.startswith("#")}
 
 def normalize_networks(ip_strs):
+    """
+    将字符串列表转换成ipaddress网络对象列表，分开IPv4和IPv6
+    """
     v4, v6 = [], []
     for s in ip_strs:
         try:
             net = ipaddress.ip_network(s, strict=False)
-            (v4 if isinstance(net, ipaddress.IPv4Network) else v6).append(net)
+            if isinstance(net, ipaddress.IPv4Network):
+                v4.append(net)
+            else:
+                v6.append(net)
         except ValueError:
             print(f"⚠️ Warning: Invalid IP network {s}", file=sys.stderr)
     return v4, v6
 
 def merge_and_format(networks, is_ipv6=False):
-    header = []
+    """
+    合并网络段，格式化成RouterOS脚本命令，并加上头部清理指令
+    """
     if is_ipv6:
         header = [
             '/log info "Loading CN ipv6 address list"',
@@ -50,7 +71,7 @@ def merge_and_format(networks, is_ipv6=False):
             '/ip firewall address-list'
         ]
     merged = list(ipaddress.collapse_addresses(networks))
-    merged.sort(key=lambda net: (net.network_address, net.prefixlen))
+    merged.sort(key=lambda net: (net.version, int(net.network_address), net.prefixlen))
     rules = [f":do {{ add address={net.with_prefixlen} list=CN }} on-error={{}}" for net in merged]
     return header + rules
 
@@ -60,8 +81,8 @@ def main():
     ipv4_plain = fetch_text(ipv4_plain_url_2)
     ipv6_plain = fetch_text(ipv6_plain_url_2)
 
-    ipv4_strs = parse_script_style_ips(ipv4_script) | parse_plain_ips(ipv4_plain)
-    ipv6_strs = parse_script_style_ips(ipv6_script) | parse_plain_ips(ipv6_plain)
+    ipv4_strs = (parse_script_style_ips(ipv4_script) | parse_plain_ips(ipv4_plain)) if ipv4_script or ipv4_plain else set()
+    ipv6_strs = (parse_script_style_ips(ipv6_script) | parse_plain_ips(ipv6_plain)) if ipv6_script or ipv6_plain else set()
 
     print(f"Total IPv4 ranges before merge: {len(ipv4_strs)}")
     print(f"Total IPv6 ranges before merge: {len(ipv6_strs)}")
@@ -80,6 +101,7 @@ def main():
     output_dir = Path("output")
     output_dir.mkdir(exist_ok=True)
 
+    # 写两个文件
     (output_dir / "CN_v2").write_text(final_output, encoding="utf-8")
     (output_dir / "CN_v2.rsc").write_text(final_output, encoding="utf-8")
 
