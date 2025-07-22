@@ -63,9 +63,13 @@ def main():
     lines_v4 = merge_and_format(ipv4_nets, "CN", is_ipv6=False)
     lines_v6 = merge_and_format(ipv6_nets, "CN", is_ipv6=True)
 
+    final_output = "\n".join(lines_v4 + [""] + lines_v6)
+
     output_dir = Path("output")
     output_dir.mkdir(exist_ok=True)
-    Path(output_dir / "CN_v2.rsc").write_text("\n".join(lines_v4 + [""] + lines_v6), encoding="utf-8")
+    # 生成.rsc文件及无后缀文件
+    Path(output_dir / "CN_v2.rsc").write_text(final_output, encoding="utf-8")
+    Path(output_dir / "CN_v2").write_text(final_output, encoding="utf-8")
 
 if __name__ == "__main__":
     main()
