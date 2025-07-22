@@ -3,7 +3,7 @@ name: Generate CN Address List (v2)
 on:
   schedule:
     - cron: '0 0 * * *'  # 每天 0 点运行（UTC 时间）
-  workflow_dispatch:      # 支持手动触发
+  workflow_dispatch:
 
 jobs:
   build:
@@ -13,29 +13,12 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-
-      - name: Cache Python packages
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('requirements*.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
-
-      - name: Install dependencies
-        run: |
-          pip install -r requirements.txt
-
       - name: Run IP merge script and output info
         id: gen_list
         run: |
           start_time=$(date +%s)
 
-          python generate_address_list_v2.py > output.log 2>&1
+          python3 generate_address_list_v2.py > output.log 2>&1
           exit_code=$?
 
           cat output.log
@@ -55,12 +38,12 @@ jobs:
           end_time=$(date +%s)
           duration=$((end_time - start_time))
 
-          echo "::set-output name=filesize::$filesize"
-          echo "::set-output name=ipv4_before::$ipv4_before"
-          echo "::set-output name=ipv6_before::$ipv6_before"
-          echo "::set-output name=ipv4_after::$ipv4_after"
-          echo "::set-output name=ipv6_after::$ipv6_after"
-          echo "::set-output name=duration::$duration"
+          echo "filesize=$filesize" >> $GITHUB_OUTPUT
+          echo "ipv4_before=$ipv4_before" >> $GITHUB_OUTPUT
+          echo "ipv6_before=$ipv6_before" >> $GITHUB_OUTPUT
+          echo "ipv4_after=$ipv4_after" >> $GITHUB_OUTPUT
+          echo "ipv6_after=$ipv6_after" >> $GITHUB_OUTPUT
+          echo "duration=$duration" >> $GITHUB_OUTPUT
 
       - name: Commit & Push result
         run: |
