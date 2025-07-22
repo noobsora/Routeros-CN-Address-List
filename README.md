@@ -1,40 +1,78 @@
 # 🇨🇳 RouterOS CN Address List
 
-This project automatically generates a RouterOS-compatible address list for all IP ranges allocated to **China (CN)** — including both **IPv4** and **IPv6**.
+This project automatically generates China (CN) IP address lists in **RouterOS-compatible RSC format**, including **IPv4** and **IPv6** segments.
 
-## 🌐 Data Sources
+It provides two versions:
 
-- [iwik.org](http://www.iwik.org)
+- ✅ `CN.rsc`: Based only on IP ranges from [iwik.org]
+- ✅ `CN_v2.rsc`: Includes everything in `CN.rsc`, plus merged IP data from [gaoyifan/china-operator-ip] (based on ASNs from major Chinese ISPs)
 
-## 📦 What It Does
+---
 
-- Fetches data from:
+## 📌 Address List Versions
+
+### 🧩 `CN.rsc` (Basic Version)
+
+- Data sources:
   - [`iwik.org` CN IPv4 list](http://www.iwik.org/ipcountry/mikrotik/CN)
   - [`iwik.org` CN IPv6 list](http://www.iwik.org/ipcountry/mikrotik_ipv6/CN)
-- Merges and outputs to a single RouterOS `.rsc` script
-- Automatically updates **daily via GitHub Actions**
-- Output file: [`output/CN.rsc`](output/CN.rsc)
+- Features:
+  - Suitable for general routing and firewall scenarios
 
-## 🧠 Use Case
+### 🧬 `CN_v2.rsc`
 
-This script is useful if you want to:
+- Based on `CN.rsc`, with additional data from:
+  - [gaoyifan/china-operator-ip](https://github.com/gaoyifan/china-operator-ip): IP segments derived from major Chinese ISPs
+- Features:
+  - More comprehensive and precise
+  - Suitable for advanced routing and traffic segmentation
 
-- Build a RouterOS firewall rule to handle traffic to/from China
-- Combine with routing or policy rules for selective bypass or blocking
-- Maintain an up-to-date CN address list without manual effort
+---
 
-## 🛠️ How to Use
+## 📂 Output Structure
 
-1. Download the latest [`CN.rsc`](output/CN.rsc) file
-2. Import it into RouterOS via WinBox or CLI:
+- Output files:
+  - `output/CN.rsc`
+  - `output/CN_v2.rsc`
+- GitHub Actions workflows:
+  - `.github/workflows/generate_address_list.yml`
+  - `.github/workflows/generate_address_list_v2.yml`
+- Update frequency: **Daily** via GitHub Actions
+
+---
+
+## 🚀 Usage
+
+1. Go to the [`output`](output/) folder.
+2. Download either `CN.rsc` or `CN_v2.rsc`.
+3. Import into RouterOS via CLI or WinBox:
+   ```shell
+   /import file-name=CN.rsc
+   ```
+
+---
+
+## 🧠 Use Cases
+
+- Create RouterOS address-lists for:
+  - Firewall filtering
+  - Policy routing
+  - Split tunneling
+- Apply in:
+  - Domestic/International traffic separation
+  - China-optimized routing acceleration
+  - Selective DNS proxying
+
+---
 
 ## ⚠️ Disclaimer
 
-This project is intended for **personal use only**.  
-We do not host or modify the original IP data, and all copyright belongs to their respective owners.
+- This project does **not** host any original IP data.
+- All copyrights belong to the respective upstream providers.
+- For personal use only. Use at your own risk.
 
-Please use at your own discretion. We are not responsible for any misuse or system misconfiguration caused by this list.
+---
 
 ## 📝 License
 
-This project is open-sourced under the [MIT License](LICENSE).
+This project is licensed under the [MIT License](LICENSE).
