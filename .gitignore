@@ -12,12 +12,15 @@ __pycache__/
 env/
 venv/
 
-# Output except CN.rsc
-/output/*
-!/output/CN.rsc
-
-# macOS files
+# macOS system files
 .DS_Store
 
-# GitHub Actions temp
+# Ignore everything in output folder
+output/*
+
+# Except CN.rsc and CN file in output folder
+!output/CN.rsc
+!output/CN
+
+# GitHub Actions temp files or backups
 *.bak
