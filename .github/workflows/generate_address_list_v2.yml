@@ -1,59 +1,79 @@
-name: Generate CN_v2 Address List
+name: Generate CN Address List (v2)
 
 on:
   schedule:
-    - cron: '0 0 * * *'  # 每天0点 UTC时间运行
-  workflow_dispatch:      # 允许手动触发
+    - cron: '0 0 * * *'  # 每天 0 点运行（UTC 时间）
+  workflow_dispatch:      # 支持手动触发
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-    - name: Setup Python 3.11
-      uses: actions/setup-python@v4
-      with:
-        python-version: "3.11"
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
 
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install requests
+      - name: Cache Python packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('requirements*.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
 
-    - name: Run IP merge script and output info
-      id: gen_list
-      run: |
-        set -o pipefail
-        start_time=$(date +%s)
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
 
-        python generate_address_list_v2.py | tee output.log
+      - name: Run IP merge script and output info
+        id: gen_list
+        run: |
+          start_time=$(date +%s)
 
-        filesize=$(stat -c%s output/CN_v2.rsc)
+          python generate_address_list_v2.py > output.log 2>&1
+          exit_code=$?
 
-        ipv4_before=$(grep "Total IPv4 ranges before merge" output.log | tail -1 | awk '{print $NF}')
-        ipv6_before=$(grep "Total IPv6 ranges before merge" output.log | tail -1 | awk '{print $NF}')
-        ipv4_after=$(grep "Total IPv4 ranges after merge" output.log | tail -1 | awk '{print $NF}')
-        ipv6_after=$(grep "Total IPv6 ranges after merge" output.log | tail -1 | awk '{print $NF}')
+          cat output.log
 
-        end_time=$(date +%s)
-        duration=$((end_time - start_time))
+          if [ $exit_code -ne 0 ]; then
+            echo "❌ Script failed with exit code $exit_code"
+            exit $exit_code
+          fi
 
-        echo "::set-output name=filesize::$filesize"
-        echo "::set-output name=ipv4_before::$ipv4_before"
-        echo "::set-output name=ipv6_before::$ipv6_before"
-        echo "::set-output name=ipv4_after::$ipv4_after"
-        echo "::set-output name=ipv6_after::$ipv6_after"
-        echo "::set-output name=duration::$duration"
+          filesize=$(stat -c%s output/CN_v2.rsc)
 
-    - name: Summary
-      run: |
-        echo "### CN_v2 Generation Summary ###"
-        echo "IPv4 ranges before merge: ${{ steps.gen_list.outputs.ipv4_before }}"
-        echo "IPv6 ranges before merge: ${{ steps.gen_list.outputs.ipv6_before }}"
-        echo "IPv4 ranges after merge: ${{ steps.gen_list.outputs.ipv4_after }}"
-        echo "IPv6 ranges after merge: ${{ steps.gen_list.outputs.ipv6_after }}"
-        echo "Output file size: ${{ steps.gen_list.outputs.filesize }} bytes"
-        echo "Script execution time: ${{ steps.gen_list.outputs.duration }} seconds"
+          ipv4_before=$(grep "Total IPv4 ranges before merge" output.log | tail -1 | awk '{print $NF}')
+          ipv6_before=$(grep "Total IPv6 ranges before merge" output.log | tail -1 | awk '{print $NF}')
+          ipv4_after=$(grep "Total IPv4 ranges after merge" output.log | tail -1 | awk '{print $NF}')
+          ipv6_after=$(grep "Total IPv6 ranges after merge" output.log | tail -1 | awk '{print $NF}')
+
+          end_time=$(date +%s)
+          duration=$((end_time - start_time))
+
+          echo "::set-output name=filesize::$filesize"
+          echo "::set-output name=ipv4_before::$ipv4_before"
+          echo "::set-output name=ipv6_before::$ipv6_before"
+          echo "::set-output name=ipv4_after::$ipv4_after"
+          echo "::set-output name=ipv6_after::$ipv6_after"
+          echo "::set-output name=duration::$duration"
+
+      - name: Commit & Push result
+        run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git add output/
+          git commit -m "📦 Update CN Address List (v2) at $(date -u '+%Y-%m-%d %H:%M:%S') UTC" || echo "No changes to commit"
+          git push
+
+      - name: Print summary
+        run: |
+          echo "✅ CN Address List v2 更新成功"
+          echo "📄 文件大小: ${{ steps.gen_list.outputs.filesize }} 字节"
+          echo "🌐 IPv4: ${{ steps.gen_list.outputs.ipv4_before }} → ${{ steps.gen_list.outputs.ipv4_after }}"
+          echo "🌐 IPv6: ${{ steps.gen_list.outputs.ipv6_before }} → ${{ steps.gen_list.outputs.ipv6_after }}"
+          echo "⏱️ 用时: ${{ steps.gen_list.outputs.duration }} 秒"
