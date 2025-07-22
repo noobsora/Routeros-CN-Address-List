@@ -1,5 +1,3 @@
-/// Generated on 2025-07-22 03:32 UTC from iwik.org CN sources (IPv4 & IPv6)
-
 /log info "Loading CN ipv4 address list"
 /ip firewall address-list remove [/ip firewall address-list find list=CN]
 /ip firewall address-list
