@@ -20,7 +20,6 @@ jobs:
         run: |
           python <<EOF
           import requests
-          from datetime import datetime
           from pathlib import Path
 
           ipv4_url = "http://www.iwik.org/ipcountry/mikrotik/CN"
@@ -33,10 +32,8 @@ jobs:
 
           ipv4 = download(ipv4_url)
           ipv6 = download(ipv6_url)
-          now = datetime.utcnow().strftime("%Y-%m-%d %H:%M UTC")
 
-          header = f"/// Generated on {now} from iwik.org CN sources (IPv4 & IPv6)\\n"
-          combined = "\\n".join([header, ipv4, "", ipv6])
+          combined = "\\n".join([ipv4, "", ipv6])
 
           output_dir = Path("output")
           output_dir.mkdir(exist_ok=True)
