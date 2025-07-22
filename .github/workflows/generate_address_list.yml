@@ -2,8 +2,8 @@ name: Generate CN Address List
 
 on:
   schedule:
-    - cron: '0 0 * * *'   # Runs daily at 00:00 UTC
-  workflow_dispatch:       # Allow manual trigger
+    - cron: '0 0 * * *'   # 每天 00:00 UTC 自动运行
+  workflow_dispatch:       # 支持手动运行
 
 jobs:
   build:
@@ -16,7 +16,7 @@ jobs:
       - name: Create output folder if not exists
         run: mkdir -p output
 
-      - name: Generate CN.rsc using Python
+      - name: Generate CN.rsc and CN files using Python
         run: |
           python <<EOF
           import requests
@@ -38,8 +38,16 @@ jobs:
           header = f"/// Generated on {now} from iwik.org CN sources (IPv4 & IPv6)\\n"
           combined = "\\n".join([header, ipv4, "", ipv6])
 
-          Path("output/CN.rsc").write_text(combined, encoding="utf-8")
-          print("✅ CN.rsc generated.")
+          output_dir = Path("output")
+          output_dir.mkdir(exist_ok=True)
+
+          file_rsc = output_dir / "CN.rsc"
+          file_noext = output_dir / "CN"
+
+          file_rsc.write_text(combined, encoding="utf-8")
+          file_noext.write_text(combined, encoding="utf-8")
+
+          print("✅ CN.rsc and CN files generated.")
           EOF
 
       - name: Commit and push changes
@@ -48,6 +56,6 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add output/CN.rsc
-          git commit -m "Auto-update CN.rsc on $(date -u +'%Y-%m-%d %H:%M UTC')" || exit 0
+          git add output/CN.rsc output/CN
+          git commit -m "Auto-update CN files on $(date -u +'%Y-%m-%d %H:%M UTC')" || exit 0
           git push https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git HEAD:main
