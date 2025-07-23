@@ -1,4 +1,4 @@
-name: Generate CN IP List v3
+name: Generate CN Address List (v3)
 
 on:
   schedule:
