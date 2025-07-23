@@ -27,6 +27,11 @@ It provides two versions:
   - More comprehensive and precise
   - Suitable for advanced routing and traffic segmentation
 
+### 🤡 `To Be Honest`
+
+- They're almost the same thing, there's not too much differences between two versions.
+- I'm just trying to make my toy looks pro.
+
 ---
 
 ## 📂 Output Structure
