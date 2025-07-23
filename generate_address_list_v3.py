@@ -1,71 +1,84 @@
+import os
 import requests
 import ipaddress
-import gzip
-import shutil
-import os
-from geoip2.database import Reader
-from maxminddb import open_database
-from datetime import datetime
+from pathlib import Path
+from tempfile import NamedTemporaryFile
+import geoip2.database
 
 MMDB_URL = "https://raw.githubusercontent.com/NobyDa/geoip/release/Private-GeoIP-CN.mmdb"
-MMDB_FILE = "CN.mmdb"
-OUTPUT_TXT = "CN_v3"
-OUTPUT_RSC = "CN_v3.rsc"
+OUTPUT_DIR = Path("Routeros-CN-Address-List/output/")
+OUTPUT_NAME = "CN_v3"
 
-def download_mmdb():
-    print(f"Downloading MMDB from {MMDB_URL} ...")
-    response = requests.get(MMDB_URL, timeout=60)
+def download_mmdb(url: str) -> Path:
+    print(f"Downloading MMDB from {url} ...")
+    response = requests.get(url, stream=True, timeout=30)
     response.raise_for_status()
-    with open(MMDB_FILE, "wb") as f:
-        f.write(response.content)
+    with NamedTemporaryFile(delete=False, suffix=".mmdb") as tmp_file:
+        for chunk in response.iter_content(chunk_size=8192):
+            tmp_file.write(chunk)
     print("Download completed.")
+    return Path(tmp_file.name)
 
-def extract_cidrs_from_mmdb():
-    cidrs_v4 = set()
-    cidrs_v6 = set()
-
-    with open_database(MMDB_FILE) as reader:
-        for network, data in reader:
-            net = ipaddress.ip_network(network)
-            if isinstance(net, ipaddress.IPv4Network):
-                cidrs_v4.add(str(net))
+def extract_cn_ip_networks(mmdb_path: Path) -> tuple[list[str], list[str]]:
+    ipv4_list = []
+    ipv6_list = []
+    with geoip2.database.Reader(str(mmdb_path)) as reader:
+        metadata = reader.metadata()
+        for network in metadata.ip_version == 4 and reader._ipv4_start or reader._ipv6_start:
+            # We don't iterate using internal pointers; use reader's internal method via database segments
+            pass
+        for record in reader._get_all_records():
+            net = ipaddress.ip_network(record["network"])
+            if net.version == 4:
+                ipv4_list.append(str(net))
             else:
-                cidrs_v6.add(str(net))
-    return sorted(cidrs_v4), sorted(cidrs_v6)
+                ipv6_list.append(str(net))
+    return ipv4_list, ipv6_list
 
-def generate_ros_script(cidrs_v4, cidrs_v6):
-    header = (
-        f"# RouterOS CN Address List\n"
-        f"# Source: {MMDB_URL}\n"
-        f"# Last Update: {datetime.utcnow().isoformat()}Z\n"
-        f"# Total IPv4: {len(cidrs_v4)} | Total IPv6: {len(cidrs_v6)}\n"
-        f"/ip firewall address-list\n"
-    )
+def generate_ros_script(ipv4_list: list[str], ipv6_list: list[str]) -> str:
+    lines = []
 
-    ros_v4 = "\n".join(
-        [f":do {{ add address={ip} list=CN }} on-error={{}}" for ip in cidrs_v4]
-    )
+    # IPv4 Header
+    lines.append('/log info "Loading CN ipv4 address list"')
+    lines.append('/ip firewall address-list remove [/ip firewall address-list find list=CN]')
+    lines.append('/ip firewall address-list')
+    for ip in ipv4_list:
+        lines.append(f':do {{ add address={ip} list=CN }} on-error={{}}')
 
-    ros_v6 = (
-        "\n/ipv6 firewall address-list\n" +
-        "\n".join(
-            [f":do {{ add address={ip} list=CN }} on-error={{}}" for ip in cidrs_v6]
-        )
-        if cidrs_v6 else ""
-    )
+    # IPv6 Header
+    lines.append('/log info "Loading CN ipv6 address list"')
+    lines.append('/ipv6 firewall address-list remove [/ipv6 firewall address-list find list=CN]')
+    lines.append('/ipv6 firewall address-list')
+    for ip in ipv6_list:
+        lines.append(f':do {{ add address={ip} list=CN }} on-error={{}}')
 
-    content = header + ros_v4 + ("\n" + ros_v6 if ros_v6 else "")
-    return content
+    return "\n".join(lines)
 
 def main():
-    download_mmdb()
-    cidrs_v4, cidrs_v6 = extract_cidrs_from_mmdb()
-    script = generate_ros_script(cidrs_v4, cidrs_v6)
+    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
-    # 写入两个一致的文件
-    for filename in [OUTPUT_TXT, OUTPUT_RSC]:
-        with open(filename, "w", encoding="utf-8") as f:
+    mmdb_path = download_mmdb(MMDB_URL)
+
+    with geoip2.database.Reader(str(mmdb_path)) as reader:
+        networks = reader.get_with_prefix_len()
+        ipv4_list = []
+        ipv6_list = []
+        for ip, prefix in networks:
+            net = ipaddress.ip_network(f"{ip}/{prefix}")
+            if net.version == 4:
+                ipv4_list.append(str(net))
+            elif net.version == 6:
+                ipv6_list.append(str(net))
+
+    script = generate_ros_script(ipv4_list, ipv6_list)
+
+    for ext in ["", ".rsc"]:
+        output_file = OUTPUT_DIR / f"{OUTPUT_NAME}{ext}"
+        with open(output_file, "w", encoding="utf-8") as f:
             f.write(script)
+        print(f"Saved to: {output_file}")
+
+    os.unlink(mmdb_path)
 
 if __name__ == "__main__":
     main()
