@@ -6,7 +6,7 @@ from datetime import datetime
 import maxminddb
 
 MMDB_URL = "https://raw.githubusercontent.com/NobyDa/geoip/release/Private-GeoIP-CN.mmdb"
-OUTPUT_DIR = Path("Routeros-CN-Address-List/output/")
+OUTPUT_DIR = Path("Routeros-CN-Address-List/output")
 OUTPUT_NAME = "CN_v3"
 
 def download_mmdb(url: str) -> Path:
@@ -25,39 +25,10 @@ def get_all_networks(mmdb_path: Path):
     ipv6_list = []
 
     with maxminddb.open_database(str(mmdb_path)) as reader:
-        # maxminddb.Reader 有 _tree 属性，可递归遍历
-        def recurse_tree(node, prefix):
-            if node is None:
-                return
-            if 'networks' in node:
-                for network in node['networks']:
-                    net = ipaddress.ip_network(network)
-                    if net.version == 4:
-                        ipv4_list.append(str(net))
-                    else:
-                        ipv6_list.append(str(net))
-            if 'children' in node:
-                for bit, child in node['children'].items():
-                    recurse_tree(child, prefix + str(bit))
-
-        # 使用内置方法遍历全部网络
-        tree = reader._tree
-        def traverse(node, prefix=''):
-            if 'value' in node and node['value'] is not None:
-                # node['value'] 有数据表示是个网络段
-                if prefix:
-                    # 把 prefix 转为网段
-                    # prefix 是二进制字符串，比如 '1100000010101000' -> 192.168.0.0/16
-                    # 但这样太复杂，直接用 reader._find_networks() 来获取 CIDR
-                    pass
-            if 'children' in node:
-                for bit in node['children']:
-                    traverse(node['children'][bit], prefix + bit)
-
-        # 但直接用 reader._find_networks() 获取所有网络更简单：
-        networks = reader._find_networks()
-        for network, _ in networks:
-            net = ipaddress.ip_network(network)
+        # 这是 NobyDa mmdb 的特性，可以用 get_prefixes() 获得所有 CIDR
+        prefixes = reader.get_prefixes()
+        for prefix in prefixes:
+            net = ipaddress.ip_network(prefix)
             if net.version == 4:
                 ipv4_list.append(str(net))
             else:
@@ -68,14 +39,12 @@ def get_all_networks(mmdb_path: Path):
 def generate_ros_script(ipv4_list, ipv6_list):
     lines = []
 
-    # IPv4 header
     lines.append('/log info "Loading CN ipv4 address list"')
     lines.append('/ip firewall address-list remove [/ip firewall address-list find list=CN]')
     lines.append('/ip firewall address-list')
     for ip in ipv4_list:
         lines.append(f':do {{ add address={ip} list=CN }} on-error={{}}')
 
-    # IPv6 header
     lines.append('/log info "Loading CN ipv6 address list"')
     lines.append('/ipv6 firewall address-list remove [/ipv6 firewall address-list find list=CN]')
     lines.append('/ipv6 firewall address-list')
@@ -98,7 +67,6 @@ def main():
             f.write(script)
         print(f"Saved {out_file}")
 
-    # 删除临时 mmdb 文件
     try:
         os.remove(mmdb_path)
     except Exception:
