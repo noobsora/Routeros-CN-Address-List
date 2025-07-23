@@ -1,0 +1,33 @@
+name: Generate CN Address List v3
+
+on:
+  schedule:
+    - cron: '0 2 * * *'  # 每天 UTC 02:00（北京时间 10:00）运行一次
+  workflow_dispatch:
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.x'
+
+    - name: Install dependencies
+      run: pip install maxminddb requests
+
+    - name: Run generator script
+      run: python generate_address_list_v3.py
+
+    - name: Commit and Push
+      run: |
+        git config user.name github-actions
+        git config user.email github-actions@github.com
+        git add CN_v3 CN_v3.rsc
+        git commit -m "Auto update CN_v3 files [bot]" || echo "No changes to commit"
+        git push
