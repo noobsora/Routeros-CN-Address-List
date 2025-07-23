@@ -19,7 +19,7 @@ It provides two versions:
 - Features:
   - Suitable for general routing and firewall scenarios
 
-### 🧬 `CN_v2.rsc`
+### 🧬 `CN_v2.rsc` (Enhanced Version)
 
 - Based on `CN.rsc`, with additional data from:
   - [gaoyifan/china-operator-ip](https://github.com/gaoyifan/china-operator-ip): IP segments derived from major Chinese ISPs
@@ -27,7 +27,7 @@ It provides two versions:
   - More comprehensive and precise
   - Suitable for advanced routing and traffic segmentation
 
-### 🤡 `To Be Honest`
+### 🤡 `BAZINGA`
 
 - There're not too much differences between two versions. I'm just trying to make my toy looks pro.
 - Whatever, it's working properly on my router as I expected.
