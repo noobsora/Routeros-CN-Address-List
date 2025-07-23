@@ -29,9 +29,8 @@ It provides two versions:
 
 ### 🤡 `To Be Honest`
 
-- They're almost the same thing, there's not too much differences between two versions.
-- I'm just trying to make my toy looks pro.
-- Although it's a childish toy, I'm actually using it on my router and it's working properly up to now.
+- There're not too much differences between two versions. I'm just trying to make my toy looks pro.
+- Whatever, it's working properly on my router as I expected.
 
 ---
 
