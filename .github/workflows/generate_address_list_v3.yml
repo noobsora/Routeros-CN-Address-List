@@ -2,32 +2,31 @@ name: Generate CN Address List (v3)
 
 on:
   schedule:
-    - cron: '0 0 * * *'  # 每天 UTC 0 点运行一次
+    - cron: '0 2 * * *'  # 每天 UTC 02:00 运行（北京时间10点）
   workflow_dispatch:
 
 jobs:
-  build:
+  generate:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+    - name: Checkout repo
+      uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: 3.11
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.x"
 
-      - name: Install dependencies
-        run: pip install geoip2 maxminddb requests
+    - name: Install dependencies
+      run: pip install requests geoip2
 
-      - name: Run generator
-        run: python generate_address_list_v3.py
+    - name: Run generation script
+      run: python generate_address_list_v3.py
 
-      - name: Commit and Push
-        run: |
-          git config user.name "github-actions"
-          git config user.email "github-actions@users.noreply.github.com"
-          git add CN_v3 CN_v3.rsc
-          git commit -m "Auto update CN IP List v3 at $(date -u '+%Y-%m-%d %H:%M:%S')"
-          git push
+    - name: Commit and push output files
+      run: |
+        git config user.name github-actions
+        git config user.email github-actions@github.com
+        git add output/CN_v3 output/CN_v3.rsc
+        git diff --quiet && echo "No changes to commit" || (git commit -m "Auto update CN_v3 files [bot]" && git push)
