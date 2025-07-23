@@ -4,8 +4,8 @@ This project automatically generates China (CN) IP address lists in **RouterOS-c
 
 It provides two versions:
 
-- ✅ `CN / CN.rsc`: Based only on IP ranges from [iwik.org]
-- ✅ `CN_v2 / CN_v2.rsc`: Includes everything in `CN.rsc`, plus merged IP data from [gaoyifan/china-operator-ip] (based on ASNs from major Chinese ISPs)
+- ✅ `CN.rsc`: Based only on IP ranges from [iwik.org]
+- ✅ `CN_v2.rsc`: Includes everything in `CN.rsc`, plus merged IP data from [gaoyifan/china-operator-ip] (based on ASNs from major Chinese ISPs)
 
 ---
 
