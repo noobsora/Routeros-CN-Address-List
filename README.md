@@ -29,8 +29,8 @@ It provides two versions:
 
 ### 🤡 `BAZINGA`
 
-- There're not too much differences between two versions. I'm just trying to make my toy looks pro.
-- Whatever, it's working properly on my router as I expected.
+- There're not too much differences between two versions.
+- Whatever, I tried and both of them can work properly on my router.
 
 ---
 
