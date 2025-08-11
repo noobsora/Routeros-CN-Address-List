@@ -7689,7 +7689,6 @@
 :do { add address=223.255.0.0/17 list=CN } on-error={}
 :do { add address=223.255.236.0/22 list=CN } on-error={}
 :do { add address=223.255.252.0/23 list=CN } on-error={}
-
 /log info "Loading CN ipv6 address list"
 /ipv6 firewall address-list remove [/ipv6 firewall address-list find list=CN]
 /ipv6 firewall address-list
