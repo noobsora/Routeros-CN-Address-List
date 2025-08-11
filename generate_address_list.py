@@ -1,33 +1,51 @@
 import requests
 from pathlib import Path
 import time
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
 
-ipv4_url = "http://www.iwik.org/ipcountry/mikrotik/CN"
-ipv6_url = "http://www.iwik.org/ipcountry/mikrotik_ipv6/CN"
+OUTPUT_DIR = Path("output")
+IPV4_URL = "http://www.iwik.org/ipcountry/mikrotik/CN"
+IPV6_URL = "http://www.iwik.org/ipcountry/mikrotik_ipv6/CN"
 
-def download(url, retries=3, delay=3):
-    for attempt in range(1, retries + 1):
-        try:
-            res = requests.get(url, timeout=30)
-            res.raise_for_status()
-            return res.text.strip()
-        except Exception as e:
-            if attempt == retries:
-                raise
-            print(f"Warning: Failed to download {url} (attempt {attempt}), retrying in {delay}s...")
-            time.sleep(delay)
+def create_session(retries=3, backoff_factor=1, status_forcelist=(500, 502, 503, 504)):
+    session = requests.Session()
+    retry = Retry(
+        total=retries,
+        read=retries,
+        connect=retries,
+        backoff_factor=backoff_factor,
+        status_forcelist=status_forcelist,
+        raise_on_status=False,
+    )
+    adapter = HTTPAdapter(max_retries=retry)
+    session.mount("http://", adapter)
+    session.mount("https://", adapter)
+    return session
+
+def download(session, url):
+    try:
+        res = session.get(url, timeout=30)
+        res.raise_for_status()
+        content = res.text.strip()
+        if not content:
+            raise ValueError(f"Downloaded content from {url} is empty")
+        return content
+    except Exception as e:
+        print(f"❌ Failed to download {url}: {e}")
+        raise
 
 def main():
-    ipv4 = download(ipv4_url)
-    ipv6 = download(ipv6_url)
+    OUTPUT_DIR.mkdir(exist_ok=True)
+    session = create_session()
 
-    combined = "\n".join([ipv4, "", ipv6])
+    ipv4 = download(session, IPV4_URL)
+    ipv6 = download(session, IPV6_URL)
 
-    output_dir = Path("output")
-    output_dir.mkdir(exist_ok=True)
+    combined = "\n".join(part for part in (ipv4, ipv6) if part)
 
-    file_rsc = output_dir / "CN.rsc"
-    file_noext = output_dir / "CN"
+    file_rsc = OUTPUT_DIR / "CN.rsc"
+    file_noext = OUTPUT_DIR / "CN"
 
     file_rsc.write_text(combined, encoding="utf-8")
     file_noext.write_text(combined, encoding="utf-8")
