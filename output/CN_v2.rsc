@@ -19189,14 +19189,13 @@
 :do { add address=2a14:67c1:b4d0::/45 list=CN } on-error={}
 :do { add address=2a14:67c1:b4e0::/43 list=CN } on-error={}
 :do { add address=2a14:67c1:b500::/47 list=CN } on-error={}
-:do { add address=2a14:67c1:b549::/48 list=CN } on-error={}
 :do { add address=2a14:67c1:b561::/48 list=CN } on-error={}
 :do { add address=2a14:67c1:b563::/48 list=CN } on-error={}
 :do { add address=2a14:67c1:b566::/48 list=CN } on-error={}
 :do { add address=2a14:67c1:b582::/48 list=CN } on-error={}
 :do { add address=2a14:67c1:b586::/48 list=CN } on-error={}
 :do { add address=2a14:67c1:b588::/47 list=CN } on-error={}
-:do { add address=2a14:67c1:b590::/48 list=CN } on-error={}
+:do { add address=2a14:67c1:b590::/47 list=CN } on-error={}
 :do { add address=2a14:67c5:1900::/40 list=CN } on-error={}
 :do { add address=2a14:7580:740::/44 list=CN } on-error={}
 :do { add address=2a14:7580:750::/47 list=CN } on-error={}
