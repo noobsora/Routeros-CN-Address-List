@@ -1026,7 +1026,6 @@
 :do { add address=45.147.6.0/24 list=CN } on-error={}
 :do { add address=45.149.16.0/22 list=CN } on-error={}
 :do { add address=45.151.47.0/24 list=CN } on-error={}
-:do { add address=45.157.88.0/24 list=CN } on-error={}
 :do { add address=45.195.6.0/24 list=CN } on-error={}
 :do { add address=45.195.189.0/24 list=CN } on-error={}
 :do { add address=45.195.190.0/24 list=CN } on-error={}
@@ -18772,11 +18771,13 @@
 :do { add address=2a0e:ec05:79c0::/42 list=CN } on-error={}
 :do { add address=2a0e:ec05:7a00::/40 list=CN } on-error={}
 :do { add address=2a0e:ec05:7b00::/42 list=CN } on-error={}
-:do { add address=2a0f:1cc5:10::/48 list=CN } on-error={}
+:do { add address=2a0f:1cc5:10::/47 list=CN } on-error={}
 :do { add address=2a0f:1cc5:20::/44 list=CN } on-error={}
 :do { add address=2a0f:1cc5:100::/44 list=CN } on-error={}
 :do { add address=2a0f:1cc5:600::/47 list=CN } on-error={}
-:do { add address=2a0f:1cc5:f00::/46 list=CN } on-error={}
+:do { add address=2a0f:1cc5:610::/48 list=CN } on-error={}
+:do { add address=2a0f:1cc5:f00::/47 list=CN } on-error={}
+:do { add address=2a0f:1cc5:f03::/48 list=CN } on-error={}
 :do { add address=2a0f:1cc5:f04::/47 list=CN } on-error={}
 :do { add address=2a0f:1cc5:f06::/48 list=CN } on-error={}
 :do { add address=2a0f:1cc6:b100::/48 list=CN } on-error={}
@@ -18787,6 +18788,7 @@
 :do { add address=2a0f:6284:440::/43 list=CN } on-error={}
 :do { add address=2a0f:6284:3000::/36 list=CN } on-error={}
 :do { add address=2a0f:6284:4b00::/40 list=CN } on-error={}
+:do { add address=2a0f:6284:4c00::/44 list=CN } on-error={}
 :do { add address=2a0f:6284:4c20::/44 list=CN } on-error={}
 :do { add address=2a0f:6284:4c30::/48 list=CN } on-error={}
 :do { add address=2a0f:6284:4c40::/43 list=CN } on-error={}
@@ -18962,6 +18964,7 @@
 :do { add address=2a14:7583:f702::/47 list=CN } on-error={}
 :do { add address=2a14:7583:f704::/46 list=CN } on-error={}
 :do { add address=2a14:7583:f708::/46 list=CN } on-error={}
+:do { add address=2a14:7583:f70c::/48 list=CN } on-error={}
 :do { add address=2a14:7583:f743::/48 list=CN } on-error={}
 :do { add address=2a14:7583:f744::/48 list=CN } on-error={}
 :do { add address=2a14:7583:f764::/48 list=CN } on-error={}
