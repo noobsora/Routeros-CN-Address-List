@@ -19866,7 +19866,7 @@
 :do { add address=2a14:7581:3100::/40 list=CN } on-error={}
 :do { add address=2a14:7581:381a::/48 list=CN } on-error={}
 :do { add address=2a14:7583:e0e0::/48 list=CN } on-error={}
-:do { add address=2a14:7583:f224::/47 list=CN } on-error={}
+:do { add address=2a14:7583:f224::/48 list=CN } on-error={}
 :do { add address=2a14:7583:f228::/48 list=CN } on-error={}
 :do { add address=2a14:7583:f22c::/48 list=CN } on-error={}
 :do { add address=2a14:7583:f244::/48 list=CN } on-error={}
