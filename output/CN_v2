@@ -16703,6 +16703,7 @@
 :do { add address=2a0e:ec05:79c0::/42 list=CN } on-error={}
 :do { add address=2a0e:ec05:7a00::/40 list=CN } on-error={}
 :do { add address=2a0e:ec05:7b00::/42 list=CN } on-error={}
+:do { add address=2a0f:1cc5:14::/46 list=CN } on-error={}
 :do { add address=2a0f:1cc5:1f::/48 list=CN } on-error={}
 :do { add address=2a0f:1cc5:314::/46 list=CN } on-error={}
 :do { add address=2a0f:1cc5:318::/45 list=CN } on-error={}
