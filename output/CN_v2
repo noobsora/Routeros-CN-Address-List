@@ -17417,7 +17417,7 @@
 :do { add address=2a0f:1cc5:10::/44 list=CN } on-error={}
 :do { add address=2a0f:1cc5:110::/44 list=CN } on-error={}
 :do { add address=2a0f:1cc5:130::/44 list=CN } on-error={}
-:do { add address=2a0f:1cc5:140::/43 list=CN } on-error={}
+:do { add address=2a0f:1cc5:140::/44 list=CN } on-error={}
 :do { add address=2a0f:1cc5:600::/47 list=CN } on-error={}
 :do { add address=2a0f:1cc5:603::/48 list=CN } on-error={}
 :do { add address=2a0f:1cc5:642::/48 list=CN } on-error={}
