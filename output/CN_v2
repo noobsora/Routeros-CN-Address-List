@@ -17983,6 +17983,7 @@
 :do { add address=2a14:67c3:30::/44 list=CN } on-error={}
 :do { add address=2a14:67c3:c0::/48 list=CN } on-error={}
 :do { add address=2a14:67c3:190::/47 list=CN } on-error={}
+:do { add address=2a14:67c3:360::/48 list=CN } on-error={}
 :do { add address=2a14:67c3:770:8600::/56 list=CN } on-error={}
 :do { add address=2a14:67c3:caf0::/45 list=CN } on-error={}
 :do { add address=2a14:67c3:caf8::/46 list=CN } on-error={}
