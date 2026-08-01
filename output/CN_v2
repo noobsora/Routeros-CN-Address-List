@@ -1313,6 +1313,7 @@
 :do { add address=82.29.98.0/24 list=CN } on-error={}
 :do { add address=82.139.229.0/24 list=CN } on-error={}
 :do { add address=82.156.0.0/15 list=CN } on-error={}
+:do { add address=83.245.71.0/24 list=CN } on-error={}
 :do { add address=85.209.217.0/24 list=CN } on-error={}
 :do { add address=85.239.154.0/24 list=CN } on-error={}
 :do { add address=87.76.221.0/24 list=CN } on-error={}
@@ -3791,6 +3792,7 @@
 :do { add address=106.108.0.0/14 list=CN } on-error={}
 :do { add address=106.112.0.0/12 list=CN } on-error={}
 :do { add address=106.224.0.0/12 list=CN } on-error={}
+:do { add address=107.149.9.0/24 list=CN } on-error={}
 :do { add address=107.149.27.0/24 list=CN } on-error={}
 :do { add address=107.153.91.0/24 list=CN } on-error={}
 :do { add address=107.153.92.0/24 list=CN } on-error={}
@@ -5015,6 +5017,7 @@
 :do { add address=162.128.207.224/30 list=CN } on-error={}
 :do { add address=162.141.140.0/24 list=CN } on-error={}
 :do { add address=163.0.0.0/16 list=CN } on-error={}
+:do { add address=163.5.97.0/24 list=CN } on-error={}
 :do { add address=163.47.4.0/22 list=CN } on-error={}
 :do { add address=163.53.0.0/20 list=CN } on-error={}
 :do { add address=163.53.36.0/22 list=CN } on-error={}
@@ -5081,6 +5084,7 @@
 :do { add address=168.98.35.230/32 list=CN } on-error={}
 :do { add address=168.98.35.232/32 list=CN } on-error={}
 :do { add address=168.160.0.0/16 list=CN } on-error={}
+:do { add address=168.222.18.0/24 list=CN } on-error={}
 :do { add address=170.39.203.34/32 list=CN } on-error={}
 :do { add address=170.83.236.0/22 list=CN } on-error={}
 :do { add address=170.179.0.0/16 list=CN } on-error={}
@@ -5144,7 +5148,6 @@
 :do { add address=177.203.96.0/19 list=CN } on-error={}
 :do { add address=177.203.224.0/19 list=CN } on-error={}
 :do { add address=178.83.133.0/24 list=CN } on-error={}
-:do { add address=178.95.192.0/24 list=CN } on-error={}
 :do { add address=178.236.224.0/23 list=CN } on-error={}
 :do { add address=178.236.227.0/24 list=CN } on-error={}
 :do { add address=178.236.228.0/22 list=CN } on-error={}
