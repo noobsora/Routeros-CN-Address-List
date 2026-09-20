@@ -16917,7 +16917,7 @@
 :do { add address=2606:54c3:0:1a66::/64 list=CN } on-error={}
 :do { add address=2606:54c3:0:1a91::/64 list=CN } on-error={}
 :do { add address=2607:6b80:69::/48 list=CN } on-error={}
-:do { add address=2620:57:4004::/48 list=CN } on-error={}
+:do { add address=2620:57:4004::/47 list=CN } on-error={}
 :do { add address=2804:1e48:9002::/48 list=CN } on-error={}
 :do { add address=2a00:79e0:ffe3:5900::/56 list=CN } on-error={}
 :do { add address=2a00:79e0:ffe3:8400::/56 list=CN } on-error={}
