@@ -3927,6 +3927,7 @@
 :do { add address=106.108.0.0/14 list=CN } on-error={}
 :do { add address=106.112.0.0/12 list=CN } on-error={}
 :do { add address=106.224.0.0/12 list=CN } on-error={}
+:do { add address=109.66.22.0/23 list=CN } on-error={}
 :do { add address=109.118.6.20/32 list=CN } on-error={}
 :do { add address=109.118.6.23/32 list=CN } on-error={}
 :do { add address=109.134.14.71/32 list=CN } on-error={}
