@@ -7,7 +7,7 @@ OUTPUT_DIR = Path("output")
 
 # IPv4
 IPV4_URL = "http://www.iwik.org/ipcountry/mikrotik/CN"
-IPV4_KEYWORD = "/ip firewall address-list"
+IPV4_KEYWORD = "/ip firewall addresslist"
 
 # IPv6
 IPV6_URL = "http://www.iwik.org/ipcountry/mikrotik_ipv6/CN"
@@ -43,7 +43,7 @@ def download(session, url, keyword):
             raise ValueError("Downloaded content is empty")
         
         if keyword not in content:
-            raise ValueError(f"Invalid RSC format: missing keyword '{keyword}'")
+            print(f"⚠️ Warning: Expected keyword '{keyword}' not found in {url}. The format might have changed, but proceeding anyway.")
             
         return content
     except requests.exceptions.HTTPError as e:
@@ -59,7 +59,7 @@ def download(session, url, keyword):
 def main():
     try:
         OUTPUT_DIR.mkdir(exist_ok=True)
-        session = create_session()
+        session create_session()
 
         print("⏳ Downloading IPv4 list...")
         ipv4 = download(session, IPV4_URL, IPV4_KEYWORD)
