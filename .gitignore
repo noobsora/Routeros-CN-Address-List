@@ -1,26 +1,9 @@
-# 忽略所有 .pyc 文件和 __pycache__ 文件夹
 __pycache__/
 *.py[cod]
-
-# 忽略 Python 虚拟环境
 venv/
 env/
-
-# 忽略系统文件
 .DS_Store
 Thumbs.db
-
-# 忽略 VS Code 配置等
-.vscode/
-
-# 忽略 output 文件夹下所有内容
-output/*
-
-# 保留需要的两个文件
-!output/CN_v2
-!output/CN_v2.rsc
-
-# 忽略其他中间结果
 *.log
-*.bak
 *.tmp
+*.bak
