@@ -8,19 +8,31 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests
+
       - name: Run IP merge script and output info
         id: gen_list
         run: |
+          mkdir -p output
+          
           start_time=$(date +%s)
-
-          python3 generate_address_list_v2.py > output.log 2>&1
+          python generate_address_list_v2.py > output.log 2>&1
           exit_code=$?
-
           cat output.log
 
           if [ $exit_code -ne 0 ]; then
@@ -29,11 +41,10 @@ jobs:
           fi
 
           filesize=$(stat -c%s output/CN_v2.rsc)
-
-          ipv4_before=$(grep "Total IPv4 ranges before merge" output.log | tail -1 | awk '{print $NF}')
-          ipv6_before=$(grep "Total IPv6 ranges before merge" output.log | tail -1 | awk '{print $NF}')
-          ipv4_after=$(grep "Total IPv4 ranges after merge" output.log | tail -1 | awk '{print $NF}')
-          ipv6_after=$(grep "Total IPv6 ranges after merge" output.log | tail -1 | awk '{print $NF}')
+          ipv4_before=$(grep "Original IPv4 count:" output.log | awk '{print $NF}')
+          ipv6_before=$(grep "Original IPv6 count:" output.log | awk '{print $NF}')
+          ipv4_after=$( "Merged IPv4 count:" output.log | awk '{print $NF}')
+          ipv6_after=$(grep "Merged IPv6 count:" output.log | awk '{print $NF}')
 
           end_time=$(date +%s)
           duration=$((end_time - start_time))
@@ -46,12 +57,13 @@ jobs:
           echo "duration=$duration" >> $GITHUB_OUTPUT
 
       - name: Commit & Push result
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          git config user.name github-actions
-          git config user.email github-actions@github.com
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add output/
-          git commit -m "📦 Update CN Address List (v2) at $(date -u '+%Y-%m-%d %H:%M:%S') UTC" || echo "No changes to commit"
-          git push
+          git diff --quiet && git branch --show-current || (git commit -m "📦 Update CN Address List (v2) at $(date -u '+%Y-%m-%d %H:%M:%S') UTC" && git push https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git HEAD:main)
 
       - name: Print summary
         run: |
