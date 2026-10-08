@@ -35,7 +35,8 @@ def download(session, url, keyword):
         }
         res = session.get(url, timeout=(5, 30), headers=headers)
         res.raise_for_status()
-        
+
+        res.encoding = 'utf-8'
         content = res.text.strip()
         
         if not content:
