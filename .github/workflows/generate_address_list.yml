@@ -1,4 +1,4 @@
-name: Generate CN Address List
+name: Generate All Address Lists
 
 on:
   schedule:
@@ -25,14 +25,18 @@ jobs:
           python -m pip install --upgrade pip
           pip install requests
 
-      - name: Run generate_address_list.py
-        run: |
-          python generate_address_list.py
+      - name: Run Basic Version
+        run: python generate_address_list.py
 
-      - name: Show output file info
+      - name: Run V2 Version
+        run: python generate_address_list_v2.py
+
+      - name: Show all output files
         run: |
-          ls -lh output/CN*
-          wc -l output/CN*
+          echo "Listing all generated files:"
+          ls -lh output/
+          echo "Checking line counts:"
+          wc -l output/*
 
       - name: Commit and push changes
         env:
@@ -40,5 +44,13 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add output/CN.rsc output/CN
-          git diff --quiet && git branch --show-current || (git commit -m "📦 Auto-update CN files on $(date -u +'%Y-%m-%d %H:%M UTC')" && git push https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git HEAD:main)
+          
+           add output/
+          
+          if ! git diff --cached --quiet; then
+            echo "Changes detected, committing both versions..."
+            git commit -m "📦 Auto-update all CN lists on $(date -u +'%Y-%m-%d %H:%M UTC')"
+            git push https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git HEAD:${{ github.ref_name }}
+          else
+            echo "No changes detected in any file. Skipping push."
+          fi
