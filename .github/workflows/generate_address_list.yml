@@ -2,23 +2,32 @@ name: Generate CN Address List
 
 on:
   schedule:
-    - cron: '0 0 * * *'   # 每天 00:00 UTC 自动运行
+    - cron: '0 0 * * *'
   workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Create output folder if not exists
-        run: mkdir -p output
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests
 
       - name: Run generate_address_list.py
         run: |
-          python3 generate_address_list.py
+          python generate_address_list.py
 
       - name: Show output file info
         run: |
@@ -32,5 +41,4 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add output/CN.rsc output/CN
-          git commit -m "📦 Auto-update CN files on $(date -u +'%Y-%m-%d %H:%M UTC')" || echo "No changes to commit"
-          git push https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git HEAD:main
+          git diff --quiet && git branch --show-current || (git commit -m "📦 Auto-update CN files on $(date -u +'%Y-%m-%d %H:%M UTC')" && git push https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git HEAD:main)
