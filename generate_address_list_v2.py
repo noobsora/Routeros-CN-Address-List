@@ -79,7 +79,7 @@ def merge_and_format(networks: List[ipaddress._BaseNetwork], is_ipv6: bool = Fal
     collapsed = sorted(ipaddress.collapse_addresses(networks), key=lambda net: (int(net.network_address), net.prefixlen))
     rules = [f':do {{ add address={net.with_prefixlen} list=CN }} on-error={{}}' for net in collapsed]
     
-    return header rules, len(rules)
+    return header + rules, len(rules)
 
 def main() -> None:
     print("📥 Fetching IP data sources concurrently...")
@@ -87,7 +87,7 @@ def main() -> None:
     urls = {
         "ipv4_script": IPV4_SCRIPT_URL,
         "ipv6_script": IPV6_SCRIPT_URL,
-        "4_plain": IPV4_PLAIN_URL,
+        "ipv4_plain": IPV4_PLAIN_URL,
         "ipv6_plain": IPV6_PLAIN_URL,
     }
 
@@ -129,7 +129,7 @@ def main() -> None:
     file_rsc.write_text(final_output, encoding="utf-8")
     file_noext.write_text(final_output, encoding="utf-8")
 
-    print(f"💾 Files saved: {file_noext.name} and {file_rsc.name} (Total size: {file_rsc.stat().st_size / 1024:.2} KB)")
+    print(f"💾 Files saved: {file_noext.name} and {file_rsc.name} (Total size: {file_rsc.stat().st_size / 1024:.2f} KB)")
 
 if __name__ == "__main__":
     main()
