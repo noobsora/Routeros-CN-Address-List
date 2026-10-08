@@ -47,7 +47,7 @@ def download(session, url, keyword):
     except requests.exceptions.HTTPError as e:
         print(f"❌ HTTP Error for {url}: {e}")
         raise
-    except requests..ConnectionError as e:
+    except requests.exceptions.ConnectionError as e:
         print(f"❌ Connection Error for {url}: {e}")
         raise
     except Exception as e:
