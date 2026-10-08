@@ -2,10 +2,10 @@
 
 This project automatically generates China (CN) IP address lists in **RouterOS-compatible RSC format**, including **IPv4** and **IPv6** segments.
 
-It provides two versions:
+Provides with two versions:
 
 - ✅ `CN.rsc`: Based only on IP ranges from [iwik.org]
-- ✅ `CN_v2.rsc`: Includes everything in `CN.rsc`, plus merged IP data from [gaoyifan/china-operator-ip] (based on ASNs from major Chinese ISPs)
+- ✅ `CN_v2.rsc`: Based on `CN.rsc`, plus merged IP data from [gaoyifan/china-operator-ip] (based on ASNs from major Chinese ISPs)
 
 ---
 
@@ -24,13 +24,13 @@ It provides two versions:
 - Based on `CN.rsc`, with additional data from:
   - [gaoyifan/china-operator-ip](https://github.com/gaoyifan/china-operator-ip): IP segments derived from major Chinese ISPs
 - Features:
-  - More comprehensive and precise
+  - A little bit more comprehensive and precise
   - Suitable for advanced routing and traffic segmentation
 
 ### 🤡 `BAZINGA`
 
 - There're not too much differences between two versions.
-- I suggest V2.
+- V2 may be better.
 
 ---
 
@@ -39,9 +39,6 @@ It provides two versions:
 - Output files:
   - `output/CN.rsc`
   - `output/CN_v2.rsc`
-- GitHub Actions workflows:
-  - `.github/workflows/generate_address_list.yml`
-  - `.github/workflows/generate_address_list_v2.yml`
 - Update frequency: **Daily** via GitHub Actions
 
 ---
@@ -54,19 +51,6 @@ It provides two versions:
    ```shell
    /import file-name=CN.rsc
    ```
-
----
-
-## 🧠 Use Cases
-
-- Create RouterOS address-lists for:
-  - Firewall filtering
-  - Policy routing
-  - Split tunneling
-- Apply in:
-  - Domestic/International traffic separation
-  - China-optimized routing acceleration
-  - Selective DNS proxying
 
 ---
 
