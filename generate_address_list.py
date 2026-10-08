@@ -59,7 +59,7 @@ def download(session, url, keyword):
 def main():
     try:
         OUTPUT_DIR.mkdir(exist_ok=True)
-        session create_session()
+        session = create_session()
 
         print("⏳ Downloading IPv4 list...")
         ipv4 = download(session, IPV4_URL, IPV4_KEYWORD)
