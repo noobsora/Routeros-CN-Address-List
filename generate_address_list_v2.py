@@ -31,7 +31,7 @@ def create_session(retries=3, backoff_factor=1, status_forcelist=(500, 502, 503,
 def fetch_text(session, url: str) -> str:
     try:
         headers = {
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win4; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
         }
         resp = session.get(url, timeout=(5, 30), headers=headers)
         resp.raise_for_status()
@@ -97,54 +97,56 @@ def main() -> None:
     }
 
     session = create_session()
-    results = {}
+    try:
+        results = {}
+        with ThreadPoolExecutor(max_workers=4) as executor:
+            future_to_key = {executor.submit(fetch_text, session, url): key for key, url in urls.items()}
+            for future in as_completed(future_to_key):
+                key = future_to_key[future]
+                results[key] = future.result()
 
-    with ThreadPoolExecutor(max_workers=4) as executor:
-        future_to_key = {executor.submit(fetch_text, session, url): key for key, url in urls.items()}
-        for future in as_completed(future_to_key):
-            key = future_to_key[future]
-            results[key] = future.result()
+        print("📦 Parsing raw address segments...")
+        ipv4_strs = parse_script_style_ips(results["ipv4_script"]) | parse_plain_ips(results["ipv4_plain"])
+        ipv6_strs = parse_script_style_ips(results["ipv6_script"]) | parse_plain_ips(results["ipv6_plain"])
 
-    print("📦 Parsing raw address segments...")
-    ipv4_strs = parse_script_style_ips(results["ipv4_script"]) | parse_plain_ips(results["ipv4_plain"])
-    ipv6_strs = parse_script_style_ips(results["ipv6_script"]) | parse_plain_ips(results["ipv6_plain"])
+        print(f"Original IPv4 count: {len(ipv4_strs)}")
+        print(f"Original IPv6 count: {len(ipv6_strs)}")
 
-    print(f"Original IPv4 count: {len(ipv4_strs)}")
-    print(f"Original IPv6 count: {len(ipv6_strs)}")
+        if not ipv4_strs and not ipv6_strs:
+            print("❌ No valid IP ranges found, exiting.", file=sys.stderr)
+            sys.exit(1)
 
-    if not ipv4_strs and not ipv6_strs:
-        print("❌ No valid IP ranges found, exiting.", file=sys.stderr)
-        sys.exit(1)
+        ipv4_nets, ipv6_nets = normalize_networks(ipv4_strs, ipv6_strs)
 
-    ipv4_nets, ipv6_nets = normalize_networks(ipv4_strs, ipv6_strs)
+        merged_ipv4, count_ipv4 = merge_and_format(ipv4_nets, is_ipv6=False)
+        merged_ipv6, count_ipv6 = merge_and_format(ipv6_nets, is_ipv6=True)
 
-    merged_ipv4, count_ipv4 = merge_and_format(ipv4_nets, is_ipv6=False)
-    merged_ipv6, count_ipv6 = merge_and_format(ipv6_nets, is_ipv6=True)
+        print(f"Merged IPv4 count: {count_ipv4}")
+        print(f"Merged IPv6 count: {count_ipv6}")
 
-    print(f"Merged IPv4 count: {count_ipv4}")
-    print(f"Merged IPv6 count: {count_ipv6}")
+        final_parts = []
+        if merged_ipv4:
+            final_parts.append("\n".join(merged_ipv4))
+        if merged_ipv6:
+            final_parts.append("\n".join(merged_ipv6))
+        
+        final_output = "\n\n".join(final_parts)
 
-    final_parts = []
-    if merged_ipv4:
-        final_parts.append("\n".join(merged_ipv4))
-    if merged_ipv6:
-        final_parts.append("\n".join(merged_ipv6))
-    
-    final_output = "\n\n".join(final_parts)
+        if not final_output:
+            print("❌ No output content generated after merging, exiting.", file=sys.stderr)
+            sys.exit(1)
 
-    if not final_output:
-        print("❌ No output content generated after merging, exiting.", file=sys.stderr)
-        sys.exit(1)
+        OUTPUT_DIR.mkdir(exist_ok=True)
 
-    OUTPUT_DIR.mkdir(exist_ok=True)
+        file_rsc = OUTPUT_DIR / f"{OUTPUT_FILE_NAME}.rsc"
+        file_noext = OUTPUT_DIR / OUTPUT_FILE_NAME
 
-    file_rsc = OUTPUT_DIR / f"{OUTPUT_FILE_NAME}.rsc"
-    file_noext = OUTPUT_DIR / OUTPUT_FILE_NAME
+        file_rsc.write_text(final_output, encoding="utf-8")
+        file_noext.write_text(final_output, encoding="utf-8")
 
-    file_rsc.write_text(final_output, encoding="utf-8")
-    file_noext.write_text(final_output, encoding="utf-8")
-
-    print(f"💾 Files saved: {file_noext.name} and {file_rsc.name} (Total size: {file_rsc.stat().st_size / 1024:.2f} KB)")
+        print(f"💾 Files saved: {file_noext.name} and {file_rsc.name} (Total size: {file_rsc.stat().st_size / 1024:.2f} KB)")
+    finally:
+        session.close()
 
 if __name__ == "__main__":
     main()
