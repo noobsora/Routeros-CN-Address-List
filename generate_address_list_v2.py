@@ -31,7 +31,7 @@ def create_session(retries=3, backoff_factor=1, status_forcelist=(500, 502, 503,
 def fetch_text(session, url: str) -> str:
     try:
         headers = {
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win4; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
         }
         resp = session.get(url, timeout=(5, 30), headers=headers)
         resp.raise_for_status()
@@ -70,13 +70,18 @@ def normalize_networks(ipv4_strs: Set[str], ipv6_strs: Set[str]) -> Tuple[List[i
 
 def merge_and_format(networks: List[ipaddress._BaseNetwork], is_ipv6: bool = False) -> Tuple[List[str], int]:
     prefix = "ipv6" if is_ipv6 else "ip"
+    
+    collapsed = sorted(ipaddress.collapse_addresses(networks), key=lambda net: (int(net.network_address), net.prefixlen))
+    
+    if not collapsed:
+        return [], 0
+        
     header = [
         f'/log info "Loading CN {prefix} address list"',
         f'/{prefix} firewall address-list remove [/{prefix} firewall address-list find list=CN]',
         f'/{prefix} firewall address-list'
     ]
     
-    collapsed = sorted(ipaddress.collapse_addresses(networks), key=lambda net: (int(net.network_address), net.prefixlen))
     rules = [f':do {{ add address={net.with_prefixlen} list=CN }} on-error={{}}' for net in collapsed]
     
     return header + rules, len(rules)
@@ -119,7 +124,17 @@ def main() -> None:
     print(f"Merged IPv4 count: {count_ipv4}")
     print(f"Merged IPv6 count: {count_ipv6}")
 
-    final_output = "\n".join(merged_ipv4 + [""] + merged_ipv6)
+    final_parts = []
+    if merged_ipv4:
+        final_parts.append("\n".join(merged_ipv4))
+    if merged_ipv6:
+        final_parts.append("\n".join(merged_ipv6))
+    
+    final_output = "\n\n".join(final_parts)
+
+    if not final_output:
+        print("❌ No output content generated after merging, exiting.", file=sys.stderr)
+        sys.exit(1)
 
     OUTPUT_DIR.mkdir(exist_ok=True)
 
