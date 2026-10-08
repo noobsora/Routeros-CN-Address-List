@@ -5,13 +5,11 @@ from urllib3.util.retry import Retry
 
 OUTPUT_DIR = Path("output")
 
-# IPv4
 IPV4_URL = "http://www.iwik.org/ipcountry/mikrotik/CN"
-IPV4_KEYWORD = "/ip firewall address-list"
+IPV4_KEYWORD = "address-list"
 
-# IPv6
 IPV6_URL = "http://www.iwik.org/ipcountry/mikrotik_ipv6/CN"
-IPV6_KEYWORD = "/ipv6 firewall address-list"
+IPV6_KEYWORD = "address-list"
 
 def create_session(retries=3, backoff_factor=1, status_forcelist=(500, 502, 503, 504)):
     session = requests.Session()
@@ -40,7 +38,7 @@ def download(session, url, keyword):
         content = res.text.strip()
         
         if not content:
-            raise ValueError("Downloaded content is empty")
+            raise ValueError(f"Downloaded content from {url} is empty")
         
         if keyword not in content:
             print(f"⚠️ Warning: Expected keyword '{keyword}' not found in {url}. The format might have changed, but proceeding anyway.")
@@ -49,7 +47,7 @@ def download(session, url, keyword):
     except requests.exceptions.HTTPError as e:
         print(f"❌ HTTP Error for {url}: {e}")
         raise
-    except requests.exceptions.ConnectionError as e:
+    except requests..ConnectionError as e:
         print(f"❌ Connection Error for {url}: {e}")
         raise
     except Exception as e:
@@ -57,6 +55,7 @@ def download(session, url, keyword):
         raise
 
 def main():
+    session = None
     try:
         OUTPUT_DIR.mkdir(exist_ok=True)
         session = create_session()
@@ -86,6 +85,9 @@ def main():
     except Exception as e:
         print(f"🛑 Critical error occurred: {e}")
         exit(1)
+    finally:
+        if session:
+            session.close()
 
 if __name__ == "__main__":
     main()
