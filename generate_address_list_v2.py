@@ -9,13 +9,12 @@ from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 
 IPV4_SCRIPT_URL = "http://www.iwik.org/ipcountry/mikrotik/CN"
-IPV6_SCRIPT_URL = "http://www.iwik./ipcountry/mikrotik_ipv6/CN"
+IPV6_SCRIPT_URL = "http://www.iwik.org/ipcountry/mikrotik_ipv6/CN" 
 IPV4_PLAIN_URL = "https://raw.githubusercontent.com/gaoyifan/china-operator-ip/refs/heads/ip-lists/china.txt"
 IPV6_PLAIN_URL = "https://raw.githubusercontent.com/gaoyifan/china-operator-ip/refs/heads/ip-lists/china6.txt"
 
-OUTPUT_PATH = Path("output/CN_v2")
-OUTPUT_RSC = Path("output/CN_v2.rsc")
-VALIDATION_KEYWORD = "/ip firewall address-list" 
+OUTPUT_DIR = Path("output")
+OUTPUT_FILE_NAME = "CN_v2"
 
 def create_session(retries=3, backoff_factor=1, status_forcelist=(500, 502, 503, 504)):
     session = requests.Session()
@@ -34,7 +33,7 @@ def fetch_text(session, url: str) -> str:
         headers = {
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
         }
-        resp = session.get(url, timeout=30, headers=headers)
+        resp = session.get(url, timeout=(5, 30), headers=headers)
         resp.raise_for_status()
         content = resp.text.strip()
         
@@ -76,10 +75,11 @@ def merge_and_format(networks: List[ipaddress._BaseNetwork], is_ipv6: bool = Fal
         f'/{prefix} firewall address-list remove [/{prefix} firewall address-list find list=CN]',
         f'/{prefix} firewall address-list'
     ]
-    # 合并并排序
+    
     collapsed = sorted(ipaddress.collapse_addresses(networks), key=lambda net: (int(net.network_address), net.prefixlen))
     rules = [f':do {{ add address={net.with_prefixlen} list=CN }} on-error={{}}' for net in collapsed]
-    return header + rules, len(rules)
+    
+    return header rules, len(rules)
 
 def main() -> None:
     print("📥 Fetching IP data sources concurrently...")
@@ -87,7 +87,7 @@ def main() -> None:
     urls = {
         "ipv4_script": IPV4_SCRIPT_URL,
         "ipv6_script": IPV6_SCRIPT_URL,
-        "ipv4_plain": IPV4_PLAIN_URL,
+        "4_plain": IPV4_PLAIN_URL,
         "ipv6_plain": IPV6_PLAIN_URL,
     }
 
@@ -121,13 +121,15 @@ def main() -> None:
 
     final_output = "\n".join(merged_ipv4 + [""] + merged_ipv6)
 
-    output_dir = Path("output")
-    output_dir.mkdir(exist_ok=True)
+    OUTPUT_DIR.mkdir(exist_ok=True)
 
-    OUTPUT_PATH.write_text(final_output, encoding="utf-8")
-    OUTPUT_RSC.write_text(final_output, encoding="utf-8")
+    file_rsc = OUTPUT_DIR / f"{OUTPUT_FILE_NAME}.rsc"
+    file_noext = OUTPUT_DIR / OUTPUT_FILE_NAME
 
-    print(f"💾 Files saved: output/CN_v2 and CN_v2.rsc (Total size: {OUTPUT_RSC.stat().st_size / 1024:.2f} KB)")
+    file_rsc.write_text(final_output, encoding="utf-8")
+    file_noext.write_text(final_output, encoding="utf-8")
+
+    print(f"💾 Files saved: {file_noext.name} and {file_rsc.name} (Total size: {file_rsc.stat().st_size / 1024:.2} KB)")
 
 if __name__ == "__main__":
     main()
