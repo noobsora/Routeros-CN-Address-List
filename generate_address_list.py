@@ -7,7 +7,7 @@ OUTPUT_DIR = Path("output")
 
 # IPv4
 IPV4_URL = "http://www.iwik.org/ipcountry/mikrotik/CN"
-IPV4_KEYWORD = "/ip firewall addresslist"
+IPV4_KEYWORD = "/ip firewall address-list"
 
 # IPv6
 IPV6_URL = "http://www.iwik.org/ipcountry/mikrotik_ipv6/CN"
